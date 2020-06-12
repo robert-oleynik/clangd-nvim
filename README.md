@@ -4,40 +4,40 @@
 
 # clangd-nvim
 
-'[clangd-nvim]()' uses [Neovim]()'s build- in [Language Server Protocol]() to enable '[clangd]()''s support for semantic highlighting.
+[clangd-nvim](https://gitlab.com/robert-oleynik/clangd-nvim/) uses [Neovim](https://github.com/neovim/neovim)'s build- in [Language Server Protocol]() to enable [clangd](https://clangd.llvm.org/)'s support for semantic highlighting.
 
 ## Roadmap
 
 - [X] Implement basic semantic highlight support
-- [ ] Implement highlight groups
-- [ ] Allow higlight group changes
+- [X] Implement highlight groups
+- [ ] Allow custom higlight group
 
 ## Features
 
-- Semantic Highlighting for 'c','cpp','objc','objcpp'
+- Semantic Highlighting for `c`,`cpp`
 
 ## Requirements
 
-- clangd (Version >= 9.0)
-- Neovim (Version >= 0.5)
-- nvim-lsp
+- [clangd](https://clangd.llvm.org/) (Version >= 9.0)
+- [Neovim](https://github.com/neovim/neovim) (Version >= 0.5)
+- [nvim-lsp](https://github.com/neovim/nvim-lsp)
 
 ## Install
 
-- With '[vim-plug]()':
+- With [vim-plug](https://github.com/junegunn/vim-plug):
 
-'''vim
-" Requires
+```vim
+" Required
 Plug 'neovim/nvim-lsp'
-" Install
-Plug '...'
-'''
+" Plugin
+Plug 'robert-oleynik/clangd-nvim'
+```
 
 ## Setup
 
-'''vim
+```vim
 lua require'nvim_lsp'.clangd.setup{on_init=require'clangd_nvim'.on_init}
-'''
+```
 
 ## Screenshots
 
