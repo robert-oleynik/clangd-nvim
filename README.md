@@ -37,7 +37,18 @@ Plug 'robert-oleynik/clangd-nvim'
 ## Setup
 
 ```vim
-lua require'nvim_lsp'.clangd.setup{on_init=require'clangd_nvim'.on_init}
+lua << EOF
+require'nvim_lsp'.clangd.setup{
+    capabilities = {
+        textDocument = {
+            semanticHighlightingCapabilities = {
+                semanticHighlighting = true
+            }
+        }
+    },
+    on_init=require'clangd_nvim'.on_init
+}
+EOF
 ```
 
 ## Screenshots
