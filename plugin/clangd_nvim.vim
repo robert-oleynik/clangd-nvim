@@ -23,4 +23,17 @@
 if exists('g:loaded_clangd_nvim')
 	finish
 endif
+
+
+" Load Syntax file
+augroup clangd_nvim
+	autocmd!
+	autocmd VimEnter,ColorScheme * runtime syntax/clangd_nvim.vim
+augroup END
+
+" Load Syntax file
+if v:vim_did_enter
+	runtime syntax/clangd_nvim.vim
+endif
+
 let g:loaded_clangd_nvim = v:true
