@@ -1,5 +1,5 @@
 >
-> This Neovim plugin is still in progress.
+> This Neovim plugin is WIP.
 >
 
 # clangd-nvim
