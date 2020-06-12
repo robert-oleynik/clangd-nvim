@@ -27,51 +27,37 @@ local clangd_scopes = {}
 
 local clangd_namespace = vim.api.nvim_create_namespace("vim_lsp_clangd_references")
 
+local clangd_kind_to_highlight_group_map = {
+	-- https://github.com/clangd/coc-clangd/blob/28e8d303b723716240e680090c86535582e7894f/src/semantic-highlighting.ts#L125
+	-- https://github.com/llvm/llvm-project/blob/4e3a44d42eace1924c9cba3b7c1ea9cdbbd6cb48/clang-tools-extra/clangd/SemanticHighlighting.cpp#L584
+	["entity.name.function.cpp"] = "ClangdFunction",
+	["entity.name.function.method.cpp"] = "ClangdMethod",
+	["entity.name.function.method.static.cpp"] = "ClangdStaticMethod",
+	["variable.other.cpp"] = "ClangdVariable",
+	["variable.other.local.cpp"] = "ClangdLocalVariable",
+	["variable.parameter.cpp"] = "ClangdParameter",
+	["variable.other.field.cpp"] = "ClangdField",
+	["variable.other.static.field.cpp"] = "ClangdStaticField",
+	["entity.name.type.class.cpp"] = "ClangdClass",
+	["entity.name.type.enum.cpp"] = "ClangdEnum",
+	["variable.other.enummember.cpp"] = "ClangdEnumConstant",
+	["entity.name.type.typedef.cpp"] = "ClangdTypedef",
+	["entity.name.type.dependent.cpp"] = "ClangdDependentType",
+	["entity.name.other.dependent.cpp"] = "ClangdDependentName",
+	["entity.name.namespace.cpp"] = "ClangdNamespace",
+	["entity.name.type.template.cpp"] = "ClangdTemplateParameter",
+	["entity.name.type.concept.cpp"] = "ClangdConcept",
+	["storage.type.primitive.cpp"] = "ClangdPrimitive",
+	["entity.name.function.preprocessor.cpp"] = "ClangdMacro",
+	["meta.disabled"] = "ClangdInactiveCode",
+}
+
 local function clangd_decode_kind(scope)
-	-- Sources:
-	--		- https://github.com/clangd/coc-clangd/blob/28e8d303b723716240e680090c86535582e7894f/src/semantic-highlighting.ts#L125
-	--		- https://github.com/llvm/llvm-project/blob/4e3a44d42eace1924c9cba3b7c1ea9cdbbd6cb48/clang-tools-extra/clangd/SemanticHighlighting.cpp#L584
-	if scope == "entity.name.function.cpp" then
-		return "ClangdFunction" end
-	if scope == "entity.name.function.method.cpp" then
-		return "ClangdMethod" end
-	if scope == "entity.name.function.method.static.cpp" then
-		return "ClangdStaticMethod" end
-	if scope == "variable.other.cpp" then
-		return "ClangdVariable" end
-	if scope == "variable.other.local.cpp" then
-		return "ClangdLocalVariable" end
-	if scope == "variable.parameter.cpp" then
-		return "ClangdParameter" end
-	if scope == "variable.other.field.cpp" then
-		return "ClangdField" end
-	if scope == "variable.other.static.field.cpp" then
-		return "ClangdStaticField" end
-	if scope == "entity.name.type.class.cpp" then
-		return "ClangdClass" end
-	if scope == "entity.name.type.enum.cpp" then
-		return "ClangdEnum" end
-	if scope == "variable.other.enummember.cpp" then
-		return "ClangdEnumConstant" end
-	if scope == "entity.name.type.typedef.cpp"
-		then return "Typedef" end
-	if scope == "Clangdentity.name.type.dependent.cpp" then
-		return "DependentType" end
-	if scope == "Clangdentity.name.other.dependent.cpp" then
-		return "ClangdDependentName" end
-	if scope == "entity.name.namespace.cpp" then
-		return "ClangdNamespace" end
-	if scope == "entity.name.type.template.cpp" then
-		return "ClangdTemplate" end
-	if scope == "entity.name.type.concept.cpp" then
-		return "ClangdConcept" end
-	if scope == "storage.type.primitive.cpp" then
-		return "ClangdPrimitive" end
-	if scope == "entity.name.function.preprocessor.cpp" then
-		return "ClangdMacro" end
-	if scope == "meta.disabled" then
-		return "ClangdInactiveCode" end
-	return 'Unknown'
+	local result = clangd_kind_to_highlight_group_map[scope]
+	if not result then
+		return 'ClangdUnknown'
+	end
+	return result
 end
 
 local function highlight_references(bufnr,references)
