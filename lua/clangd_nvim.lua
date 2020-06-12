@@ -31,8 +31,8 @@ local clangd_kind_to_highlight_group_map = {
 	-- https://github.com/clangd/coc-clangd/blob/28e8d303b723716240e680090c86535582e7894f/src/semantic-highlighting.ts#L125
 	-- https://github.com/llvm/llvm-project/blob/4e3a44d42eace1924c9cba3b7c1ea9cdbbd6cb48/clang-tools-extra/clangd/SemanticHighlighting.cpp#L584
 	["entity.name.function.cpp"] = "ClangdFunction",
-	["entity.name.function.method.cpp"] = "ClangdMethod",
-	["entity.name.function.method.static.cpp"] = "ClangdStaticMethod",
+	["entity.name.function.method.cpp"] = "ClangdMemberFunction",
+	["entity.name.function.method.static.cpp"] = "ClangdStaticMemberFunction",
 	["variable.other.cpp"] = "ClangdVariable",
 	["variable.other.local.cpp"] = "ClangdLocalVariable",
 	["variable.parameter.cpp"] = "ClangdParameter",
@@ -63,7 +63,6 @@ end
 local function highlight_references(bufnr,references)
 	vim.validate { bufnr = {bufnr, 'n', true} }
 	for _,ref in ipairs(references) do
-		print(bufnr, clangd_namespace, ref.kind, ref.range.start_pos, ref.range.end_pos)
 		highlight.range(bufnr, clangd_namespace, ref.kind, ref.range.start_pos, ref.range.end_pos)
 	end
 end
