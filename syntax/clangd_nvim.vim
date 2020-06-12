@@ -19,3 +19,40 @@
 " LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 " OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 " SOFTWARE.
+
+" Link highlight groups
+hi default link ClangdInactiveCode Comment
+
+" Namespace
+hi default link ClangdNamespace	Namespace
+
+" Types
+hi default link ClangdClass	Type
+hi default link ClangdEnum Type
+hi default link ClangdTypedef Type
+hi default link ClangdDependentType Type
+hi default link ClangdTemplateParameter Type
+hi default link ClangdPrimitive Type
+hi default link ClangdConcept Type
+
+" Function
+hi default link ClangdFunction Function
+hi default link ClangdMethod Function
+hi default link ClangdStaticMethod Function
+hi default link ClangdDependentName Function
+
+" Macro
+hi default link ClangdMacro	Macro
+
+" Constant
+hi default link ClangdEnumConstant Constant
+
+" Variables
+hi default link ClangdField	Variable
+hi default link ClangdStaticField Variable
+hi default link ClangdParameter	Variable
+hi default link ClangdVariable Variable
+hi default link	ClangdLocalVariable Variable
+
+" Unknown
+hi default link ClangdUnknown		Normal
