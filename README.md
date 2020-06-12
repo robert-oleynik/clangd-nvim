@@ -4,7 +4,7 @@
 
 # clangd-nvim
 
-[clangd-nvim](https://gitlab.com/robert-oleynik/clangd-nvim/) uses [Neovim](https://github.com/neovim/neovim)'s build- in [Language Server Protocol]() to enable [clangd](https://clangd.llvm.org/)'s support for semantic highlighting.
+[clangd-nvim](https://gitlab.com/robert-oleynik/clangd-nvim/) uses [Neovim](https://github.com/neovim/neovim)'s build- in [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) to enable [clangd](https://clangd.llvm.org/)'s support for semantic highlighting.
 
 ## Roadmap
 
