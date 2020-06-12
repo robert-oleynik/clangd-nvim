@@ -42,3 +42,4 @@ lua require'nvim_lsp'.clangd.setup{on_init=require'clangd_nvim'.on_init}
 
 ## Screenshots
 
+![](screenshots/lsp_comparision.png)
