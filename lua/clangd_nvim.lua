@@ -110,6 +110,12 @@ local function on_init(config)
 	end
 end
 
+local function clear_highlight()
+	local buf_number = vim.api.nvim_get_current_buf()
+	clear_references(buf_number)
+end
+
 return {
-	on_init = on_init
+	on_init = on_init,
+	clear_highlight = clear_highlight
 }
