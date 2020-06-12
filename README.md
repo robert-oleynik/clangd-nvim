@@ -10,6 +10,7 @@
 
 - [X] Implement basic semantic highlight support
 - [X] Implement highlight groups
+- [ ] Enable/Disable semantic highlighting
 - [ ] Allow custom higlight group
 
 ## Features
