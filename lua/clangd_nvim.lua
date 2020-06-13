@@ -75,7 +75,6 @@ end
 local function on_init(config)
 	clangd_scopes = config.server_capabilities.semanticHighlighting.scopes
 	config.callbacks['textDocument/semanticHighlighting'] = function(_,_,result,_)
-		print(vim.inspect(result))
 		if not result then
 			return
 		end
@@ -102,7 +101,6 @@ local function on_init(config)
 			end
 		end
 
-		print(vim.inspect(references))
 		local buf_number = vim.api.nvim_get_current_buf()
 		-- clear_references(buf_number)
 		highlight_references(buf_number, references)
