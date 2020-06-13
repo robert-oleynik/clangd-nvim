@@ -1,10 +1,9 @@
->
-> This Neovim plugin is WIP.
->
-
 # clangd-nvim
 
 [clangd-nvim](https://gitlab.com/robert-oleynik/clangd-nvim/) uses [Neovim](https://github.com/neovim/neovim)'s build- in [Language Server Protocol](https://microsoft.github.io/language-server-protocol/) to enable [clangd](https://clangd.llvm.org/)'s support for semantic highlighting.
+
+![](screenshots/lsp_comparision.png)
+Left: clangd-nvim + nvim-lsp; Right: no plugin
 
 ## Roadmap
 
@@ -36,6 +35,7 @@ Plug 'robert-oleynik/clangd-nvim'
 
 ## Setup
 
+Add to init file:
 ```vim
 lua << EOF
 require'nvim_lsp'.clangd.setup{
@@ -50,6 +50,27 @@ require'nvim_lsp'.clangd.setup{
 }
 EOF
 ```
+
+## Change Colors
+
+1. Add to init file (init.vim)
+```vim
+augroup ConfigSetup
+    autocmd!
+    autocmd VimEnter,ColorScheme * runtime syntax/custom_colors.vim
+augroup END
+```
+2. Add to neovim config folder `syntax/custom_colors.vim`-File (on Linux `~/.config/nvim/syntax/custom_colors.vim`)
+3. Change Colors by:
+```vim
+hi! default link <clangd-syntax-highlight-group> <vim-syntax-highlight-group>
+" Example:
+hi! default link ClangdClass Type
+```
+
+>
+> Note: `:so $VIMRUNTIME/syntax/hitest.vim` lists all available syntax highlight groups with colors.
+>
 
 ## Symbols And Syntax Highlight Groups
 
@@ -76,28 +97,3 @@ EOF
 | `variable.other.enummember.cpp` | `ClangdEnumConstant` | Constant |
 | `meta.disabled` | `ClangdInactiveCode` | Comment |
 
-## Change Colors
-
-1. Add to init file (init.vim)
-```vim
-augroup ConfigSetup
-    autocmd!
-    autocmd VimEnter,ColorScheme * runtime syntax/custom_colors.vim
-augroup END
-```
-2. Add to neovim config folder `syntax/custom_colors.vim`-File (on Linux `~/.config/nvim/syntax/custom_colors.vim`)
-3. Change Colors by:
-```vim
-hi! default link <clangd-syntax-highlight-group> <vim-syntax-highlight-group>
-" Example:
-hi! default link ClangdClass Type
-```
-
->
-> Note: `:so $VIMRUNTIME/syntax/hitest.vim` lists all available syntax highlight groups with colors.
->
-
-## Screenshots
-
-![](screenshots/lsp_comparision.png)
-Left: clangd-nvim + nvim-lsp; Right: no plugin
