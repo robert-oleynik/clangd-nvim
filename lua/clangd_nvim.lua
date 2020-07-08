@@ -23,6 +23,10 @@
 local base64 = require'clangd_nvim/base64_decode'
 local highlight = require'vim/highlight'
 
+local M = {}
+
+M.enabled = true
+
 local clangd_scopes = {}
 
 local clangd_namespace = vim.api.nvim_create_namespace("vim_lsp_clangd_references")
@@ -63,6 +67,7 @@ end
 local function highlight_references(bufnr,references)
 	vim.validate { bufnr = {bufnr, 'n', true} }
 	for _,ref in ipairs(references) do
+		print(bufnr, ref.kind, vim.inspect(ref.range))
 		highlight.range(bufnr, clangd_namespace, ref.kind, ref.range.start_pos, ref.range.end_pos)
 	end
 end
@@ -72,16 +77,16 @@ local function clear_references(bufnr)
 	vim.api.nvim_buf_clear_namespace(bufnr, clangd_namespace, 0, -1)
 end
 
-local function on_init(config)
+function M.on_init(config)
 	clangd_scopes = config.server_capabilities.semanticHighlighting.scopes
 	config.callbacks['textDocument/semanticHighlighting'] = function(_,_,result,_)
-		if not result then
+		if not result or not M.enabled then
 			return
 		end
 
 		local references = {}
 		local references_index = 1
-		for i, token in ipairs(result.lines) do
+		for _, token in ipairs(result.lines) do
 			local uint32array = base64.base64toUInt32Array(token.tokens)
 			for j = 1,uint32array.size,2 do
 				local start_character_index = uint32array.data[j]
@@ -107,12 +112,24 @@ local function on_init(config)
 	end
 end
 
-local function clear_highlight()
+function M.clear_highlight()
 	local buf_number = vim.api.nvim_get_current_buf()
 	clear_references(buf_number)
 end
 
-return {
-	on_init = on_init,
-	clear_highlight = clear_highlight
-}
+function M.reload()
+	M.clear_highlight()
+	vim.api.nvim_command(":e")
+end
+
+function M.enable()
+	M.enabled = true
+	M.reload()
+end
+
+function M.disable()
+	M.enabled = false
+	M.clear_highlight()
+end
+
+return M
