@@ -13,7 +13,7 @@ Left: clangd-nvim + nvim-lsp; Right: no plugin
 
 - [X] Implement basic semantic highlight support
 - [X] Implement highlight groups
-- [ ] Enable/Disable semantic highlighting
+- [X] Enable/Disable semantic highlighting
 - [X] Change highlight color
 
 ## Features
@@ -53,6 +53,33 @@ require'nvim_lsp'.clangd.setup{
     on_init=require'clangd_nvim'.on_init
 }
 EOF
+```
+
+## Functions
+
+**Enable semantic highlighting**
+
+>
+> Enabled by default
+>
+
+```lua
+lua require'clangd_nvim'.enable()
+```
+
+**Disable semantic highlighting**
+```lua
+lua require'clangd_nvim'.disable()
+```
+
+**Reload current buffer's semantic highlight**
+```lua
+lua require'clangd_nvim'.reload()
+```
+
+**Clear current buffer's semantic highlight**
+```lua
+lua require'clangd_nvim'.clear_highlight()
 ```
 
 ## Change Colors
