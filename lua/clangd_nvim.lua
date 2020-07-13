@@ -26,6 +26,7 @@ local highlight = require'vim/highlight'
 local M = {}
 
 M.enabled = true
+M.debug = false
 
 local clangd_scopes = {}
 
@@ -67,7 +68,9 @@ end
 local function highlight_references(bufnr,references)
 	vim.validate { bufnr = {bufnr, 'n', true} }
 	for _,ref in ipairs(references) do
-		-- print(bufnr, ref.kind, vim.inspect(ref.range))
+		if M.debug then
+			print(bufnr, ref.kind, vim.inspect(ref.range))
+		end
 		highlight.range(bufnr, clangd_namespace, ref.kind, ref.range.start_pos, ref.range.end_pos)
 	end
 end
