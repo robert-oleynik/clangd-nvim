@@ -67,7 +67,7 @@ end
 local function highlight_references(bufnr,references)
 	vim.validate { bufnr = {bufnr, 'n', true} }
 	for _,ref in ipairs(references) do
-		print(bufnr, ref.kind, vim.inspect(ref.range))
+		-- print(bufnr, ref.kind, vim.inspect(ref.range))
 		highlight.range(bufnr, clangd_namespace, ref.kind, ref.range.start_pos, ref.range.end_pos)
 	end
 end
