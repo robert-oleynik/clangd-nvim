@@ -92,7 +92,8 @@ function M.on_init(config)
 
 		for _,bufnum in ipairs(vim.api.nvim_list_bufs()) do
 			local buf_name = vim.api.nvim_buf_get_name(bufnum)
-			if file~=buf_name then
+			print(buf_name,file)
+			if file==buf_name then
 				local references = {}
 				local references_index = 1
 				for _, token in ipairs(result.lines) do
