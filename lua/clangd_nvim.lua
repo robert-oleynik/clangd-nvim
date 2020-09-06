@@ -80,47 +80,50 @@ local function clear_references(bufnr)
 	vim.api.nvim_buf_clear_namespace(bufnr, clangd_namespace, 0, -1)
 end
 
-function M.on_init(config)
-	clangd_scopes = config.server_capabilities.semanticHighlighting.scopes
-	config.callbacks['textDocument/semanticHighlighting'] = function(_,_,result,_)
-		if not result or not M.enabled then
-			return
-		end
 
-		local uri = result.textDocument.uri
-		local file = string.gsub(uri,"file://","")
+local function highlight(_,_,result,_)
+	if not result or not M.enabled then
+		return
+	end
 
-		for _,bufnum in ipairs(vim.api.nvim_list_bufs()) do
-			local buf_name = vim.api.nvim_buf_get_name(bufnum)
-			print(buf_name,file)
-			if file==buf_name then
-				local references = {}
-				local references_index = 1
-				for _, token in ipairs(result.lines) do
-					local uint32array = base64.base64toUInt32Array(token.tokens)
-					for j = 1,uint32array.size,2 do
-						local start_character_index = uint32array.data[j]
-						local length = bit.rshift(uint32array.data[j+1], 16)
-						local scope_index = bit.band(uint32array.data[j+1], 0xffff)+1
+	local uri = result.textDocument.uri
+	local file = string.gsub(uri,"file://","")
 
-						local ref = {
-							range = {
-								start_pos = {token.line, start_character_index},
-								end_pos = {token.line, start_character_index + length}
-							},
-							kind = clangd_decode_kind(clangd_scopes[scope_index][1])
+	for _,bufnum in ipairs(vim.api.nvim_list_bufs()) do
+		local buf_name = vim.api.nvim_buf_get_name(bufnum)
+		print(buf_name,file)
+		if file==buf_name then
+			local references = {}
+			local references_index = 1
+			for _, token in ipairs(result.lines) do
+				local uint32array = base64.base64toUInt32Array(token.tokens)
+				for j = 1,uint32array.size,2 do
+					local start_character_index = uint32array.data[j]
+					local length = bit.rshift(uint32array.data[j+1], 16)
+					local scope_index = bit.band(uint32array.data[j+1], 0xffff)+1
 
-						}
-						references[references_index] = ref
-						references_index = references_index + 1
-					end
+					local ref = {
+						range = {
+							start_pos = {token.line, start_character_index},
+							end_pos = {token.line, start_character_index + length}
+						},
+						kind = clangd_decode_kind(clangd_scopes[scope_index][1])
+
+					}
+					references[references_index] = ref
+					references_index = references_index + 1
 				end
-
-				-- clear_references(bufnum)
-				highlight_references(bufnum, references)
 			end
+
+			-- clear_references(bufnum)
+			highlight_references(bufnum, references)
 		end
 	end
+end
+
+function M.on_init(config)
+	clangd_scopes = config.server_capabilities.semanticHighlighting.scopes
+	config.callbacks['textDocument/semanticHighlighting'] = highlight
 end
 
 function M.clear_highlight()

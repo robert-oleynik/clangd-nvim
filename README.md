@@ -42,6 +42,8 @@ Plug 'robert-oleynik/clangd-nvim'
 Add to init file:
 ```vim
 lua << EOF
+local clangd_nvim = require'clangd_nvim'
+
 require'nvim_lsp'.clangd.setup{
     capabilities = {
         textDocument = {
@@ -50,7 +52,7 @@ require'nvim_lsp'.clangd.setup{
             }
         }
     },
-    on_init=require'clangd_nvim'.on_init
+    on_init = clangd_nvim.on_init
 }
 EOF
 ```
