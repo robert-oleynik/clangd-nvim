@@ -91,7 +91,7 @@ local function highlight(_,_,result,_)
 
 	for _,bufnum in ipairs(vim.api.nvim_list_bufs()) do
 		local buf_name = vim.api.nvim_buf_get_name(bufnum)
-		print(buf_name,file)
+		-- print(buf_name,file)
 		if file==buf_name then
 			local references = {}
 			local references_index = 1
