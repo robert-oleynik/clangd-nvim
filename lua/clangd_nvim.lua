@@ -89,37 +89,36 @@ function M.on_init(config)
 
 		local uri = result.textDocument.uri
 		local file = string.gsub(uri,"file://","")
-		local buf_name = vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
 
-		if file~=buf_name then
-			return
-		end
+		for _,bufnum in ipairs(vim.api.nvim_list_bufs()) do
+			local buf_name = vim.api.nvim_buf_get_name(bufnum)
+			if file~=buf_name then
+				local references = {}
+				local references_index = 1
+				for _, token in ipairs(result.lines) do
+					local uint32array = base64.base64toUInt32Array(token.tokens)
+					for j = 1,uint32array.size,2 do
+						local start_character_index = uint32array.data[j]
+						local length = bit.rshift(uint32array.data[j+1], 16)
+						local scope_index = bit.band(uint32array.data[j+1], 0xffff)+1
 
-		local references = {}
-		local references_index = 1
-		for _, token in ipairs(result.lines) do
-			local uint32array = base64.base64toUInt32Array(token.tokens)
-			for j = 1,uint32array.size,2 do
-				local start_character_index = uint32array.data[j]
-				local length = bit.rshift(uint32array.data[j+1], 16)
-				local scope_index = bit.band(uint32array.data[j+1], 0xffff)+1
+						local ref = {
+							range = {
+								start_pos = {token.line, start_character_index},
+								end_pos = {token.line, start_character_index + length}
+							},
+							kind = clangd_decode_kind(clangd_scopes[scope_index][1])
 
-				local ref = {
-					range = {
-						start_pos = {token.line, start_character_index},
-						end_pos = {token.line, start_character_index + length}
-					},
-					kind = clangd_decode_kind(clangd_scopes[scope_index][1])
+						}
+						references[references_index] = ref
+						references_index = references_index + 1
+					end
+				end
 
-				}
-				references[references_index] = ref
-				references_index = references_index + 1
+				-- clear_references(buf_num)
+				highlight_references(buf_num, references)
 			end
 		end
-
-		local buf_number = vim.api.nvim_get_current_buf()
-		-- clear_references(buf_number)
-		highlight_references(buf_number, references)
 	end
 end
 
