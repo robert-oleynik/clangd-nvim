@@ -87,6 +87,14 @@ function M.on_init(config)
 			return
 		end
 
+		local uri = result.textDocument.uri
+		local file = string.gsub(uri,"file://","")
+		local buf_name = vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf())
+
+		if file~=buf_name then
+			return
+		end
+
 		local references = {}
 		local references_index = 1
 		for _, token in ipairs(result.lines) do
