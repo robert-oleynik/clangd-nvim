@@ -115,8 +115,8 @@ function M.on_init(config)
 					end
 				end
 
-				-- clear_references(buf_num)
-				highlight_references(buf_num, references)
+				-- clear_references(bufnum)
+				highlight_references(bufnum, references)
 			end
 		end
 	end
