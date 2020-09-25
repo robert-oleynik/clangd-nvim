@@ -108,8 +108,9 @@ local function highlight(_,_,result,_)
 							end_pos = {token.line, start_character_index + length}
 						},
 						kind = clangd_decode_kind(clangd_scopes[scope_index][1])
-
 					}
+					vim.api.nvim_buf_clear_namespace(bufnum, clangd_namespace, token.line, token.line)
+
 					references[references_index] = ref
 					references_index = references_index + 1
 				end
