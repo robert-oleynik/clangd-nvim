@@ -27,13 +27,13 @@ hi default link ClangdInactiveCode Comment
 hi default link ClangdNamespace Namespace
 
 " Types
-hi default link ClangdClass Type
-hi default link ClangdEnum Type
-hi default link ClangdTypedef Type
-hi default link ClangdDependentType Type
-hi default link ClangdTemplateParameter Type
-hi default link ClangdPrimitive Type
-hi default link ClangdConcept Type
+hi default link ClangdClass cppType
+hi default link ClangdEnum cppType
+hi default link ClangdTypedef cppType
+hi default link ClangdDependentType cppType
+hi default link ClangdTemplateParameter cppType
+hi default link ClangdPrimitive cppType
+hi default link ClangdConcept cppType
 
 " Function
 hi default link ClangdFunction Function
@@ -45,10 +45,10 @@ hi default link ClangdDependentName Function
 hi default link ClangdMacro Macro
 
 " Constant
-hi default link ClangdEnumConstant Constant
+hi default link ClangdEnumConstant cppConstant
 
 " Variables
-hi default link ClangdField	Variable
+hi default link ClangdField Variable
 hi default link ClangdStaticField Variable
 hi default link ClangdParameter Variable
 hi default link ClangdVariable Variable

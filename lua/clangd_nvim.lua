@@ -1,6 +1,6 @@
 -- MIT License
 --
--- Copyright (c) [year] [fullname]
+-- Copyright (c) 2020 Robert John Oleynik
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to deal
@@ -25,126 +25,135 @@ local highlight = require'vim/highlight'
 
 local M = {}
 
-M.enabled = true
-M.debug = false
-
-local clangd_scopes = {}
-
-local clangd_namespace = vim.api.nvim_create_namespace("vim_lsp_clangd_references")
-
-local clangd_kind_to_highlight_group_map = {
-	-- https://github.com/clangd/coc-clangd/blob/28e8d303b723716240e680090c86535582e7894f/src/semantic-highlighting.ts#L125
-	-- https://github.com/llvm/llvm-project/blob/4e3a44d42eace1924c9cba3b7c1ea9cdbbd6cb48/clang-tools-extra/clangd/SemanticHighlighting.cpp#L584
-	["entity.name.function.cpp"] = "ClangdFunction",
-	["entity.name.function.method.cpp"] = "ClangdMemberFunction",
-	["entity.name.function.method.static.cpp"] = "ClangdStaticMemberFunction",
-	["variable.other.cpp"] = "ClangdVariable",
-	["variable.other.local.cpp"] = "ClangdLocalVariable",
-	["variable.parameter.cpp"] = "ClangdParameter",
-	["variable.other.field.cpp"] = "ClangdField",
-	["variable.other.field.static.cpp"] = "ClangdStaticField",
-	["entity.name.type.class.cpp"] = "ClangdClass",
-	["entity.name.type.enum.cpp"] = "ClangdEnum",
-	["variable.other.enummember.cpp"] = "ClangdEnumConstant",
-	["entity.name.type.typedef.cpp"] = "ClangdTypedef",
-	["entity.name.type.dependent.cpp"] = "ClangdDependentType",
-	["entity.name.other.dependent.cpp"] = "ClangdDependentName",
-	["entity.name.namespace.cpp"] = "ClangdNamespace",
-	["entity.name.type.template.cpp"] = "ClangdTemplateParameter",
-	["entity.name.type.concept.cpp"] = "ClangdConcept",
-	["storage.type.primitive.cpp"] = "ClangdPrimitive",
-	["entity.name.function.preprocessor.cpp"] = "ClangdMacro",
-	["meta.disabled"] = "ClangdInactiveCode",
+M.clangd_namespace = vim.api.nvim_create_namespace("clangd_nvim_namespace")
+M.clangd_types = {
+	"ClangdVariable",
+	"ClangdLocalVariable",
+	"ClangdParameter",
+	"ClangdFunction",
+	"ClangdMemberFunction",
+	"ClangdStaticMemberFunction",
+	"ClangdField",
+	"ClangdStaticField",
+	"ClangdClass",
+	"ClangdEnum",
+	"ClangdEnumConstant",
+	"ClangdTypedef",
+	"ClangdDependentType",
+	"ClangdDependentName",
+	"ClangdNamespace",
+	"ClangdTemplateParameter",
+	"ClangdConcept",
+	"ClangdPrimitive",
+	"ClangdMacro",
+	"ClangdInactiveCode"
 }
 
-local function clangd_decode_kind(scope)
-	local result = clangd_kind_to_highlight_group_map[scope]
-	if not result then
-		return 'ClangdUnknown'
-	end
-	return result
-end
+M.capabilities = {
+	worspace = {
+		semanticTokens = {
+			-- TODO: true
+			refreshSupport = false
+		}
+	},
+	textDocument = {
+		semanticTokens = {
+			dynamicRegistration = false,
+			requests = {
+				range = true,
+				full = true
+			},
+			overlappingTokenSupport = false,
+			multilineTokenSupport = false
+		}
+	}
+}
 
-local function highlight_references(bufnr,references)
+function M.clear_buffer_highlight(bufnr)
 	vim.validate { bufnr = {bufnr, 'n', true} }
-	for _,ref in ipairs(references) do
-		if M.debug then
-			print(bufnr, ref.kind, vim.inspect(ref.range))
-		end
-		highlight.range(bufnr, clangd_namespace, ref.kind, ref.range.start_pos, ref.range.end_pos)
-	end
+	vim.api.nvim_buf_clear_namespace(bufnr,M.clangd_namespace,0,-1)
 end
 
-local function clear_references(bufnr)
-	vim.validate { bufnr = {bufnr, 'n', true} }
-	vim.api.nvim_buf_clear_namespace(bufnr, clangd_namespace, 0, -1)
+function M.highlight_ref(bufnr,ref)
+	-- print(vim.inspect(ref))
+	vim.api.nvim_buf_add_highlight(bufnr,M.clangd_namespace,ref.token,ref.line,ref.range_begin,ref.range_end)
 end
 
-
-local function highlight(_,_,result,_)
-	if not result or not M.enabled then
+function M.highlight_request(bufnr,data)
+	local token_data = data["data"]
+	if token_data==nil then
+		vim.api.nvim_err_writeln("clangd-nvim: received empty response")
 		return
 	end
 
-	local uri = result.textDocument.uri
-	local file = string.gsub(uri,"file://","")
+	local line = 0
+	local pos = 0
+	for i=1,#token_data,5 do
+		local delta_line = token_data[i]
+		local delta_pos = token_data[i+1]
+		local length = token_data[i+2]
+		local tokenType = token_data[i+3]
+		-- Not used by clangd
+		-- local tokenMods = token_data[i+4]
 
-	for _,bufnum in ipairs(vim.api.nvim_list_bufs()) do
-		local buf_name = vim.api.nvim_buf_get_name(bufnum)
-		-- print(buf_name,file)
-		if file==buf_name then
-			local references = {}
-			local references_index = 1
-			for _, token in ipairs(result.lines) do
-				local uint32array = base64.base64toUInt32Array(token.tokens)
-				for j = 1,uint32array.size,2 do
-					local start_character_index = uint32array.data[j]
-					local length = bit.rshift(uint32array.data[j+1], 16)
-					local scope_index = bit.band(uint32array.data[j+1], 0xffff)+1
-
-					local ref = {
-						range = {
-							start_pos = {token.line, start_character_index},
-							end_pos = {token.line, start_character_index + length}
-						},
-						kind = clangd_decode_kind(clangd_scopes[scope_index][1])
-					}
-					vim.api.nvim_buf_clear_namespace(bufnum, clangd_namespace, token.line, token.line)
-
-					references[references_index] = ref
-					references_index = references_index + 1
-				end
-			end
-
-			-- clear_references(bufnum)
-			highlight_references(bufnum, references)
+		if not (delta_line == 0) then
+			line = line + delta_line
+			pos = 0
 		end
+		pos = pos + delta_pos
+
+		local ref = {
+			line = line,
+			range_begin = pos,
+			range_end = pos + length,
+			token = M.clangd_types[tokenType+1]
+		}
+		M.highlight_ref(bufnr,ref)
 	end
 end
 
-function M.on_init(config)
-	clangd_scopes = config.server_capabilities.semanticHighlighting.scopes
-	config.callbacks['textDocument/semanticHighlighting'] = highlight
+function M.highlight_buffer_range(bufnr,line_begin,line_end)
+	vim.validate { bufnr = { bufnr, 'n', true }}
+	local params = {
+		["textDocument"] = {
+			["uri"] = vim.uri_from_bufnr(bufnr)
+		},
+		["range"] = {
+			["start"] = { line_begin,0 },
+			["end"] = { line_end,0 }
+		}
+	}
+	vim.lsp.buf_request(bufnr,"textDocument/semanticTokens/range",params,function(_,_,data,_)
+		vim.api.nvim_buf_clear_namespace(bufnr,M.clangd_namespace,line_begin,line_end)
+		M.highlight_request(bufnr,data)
+	end)
 end
 
-function M.clear_highlight()
-	local buf_number = vim.api.nvim_get_current_buf()
-	clear_references(buf_number)
+function M.highlight_buffer(bufnr)
+	if bufnr == nil then
+		bufnr = vim.api.nvim_get_current_buf()
+	else
+		vim.validate { bufnr = {bufnr, 'n', true} }
+	end
+	local params = {
+		textDocument =  {
+			uri = vim.uri_from_bufnr(bufnr)
+		}
+	}
+	vim.lsp.buf_request(bufnr,"textDocument/semanticTokens/full",params,function(_,_,data,_)
+		M.clear_buffer_highlight(bufnr)
+		M.highlight_request(bufnr,data)
+	end)
 end
 
-function M.reload()
-	M.clear_highlight()
-	vim.api.nvim_command(":e")
-end
-
-function M.enable()
-	M.enabled = true
-	M.reload()
-end
-
-function M.disable()
-	M.enabled = false
-	M.clear_highlight()
+function M.on_attach(config)
+	local bufnr = vim.api.nvim_get_current_buf()
+	if (config.server_capabilities.semanticTokensProvider.range) then
+		vim.api.nvim_buf_attach(bufnr, false, { on_lines = function(_,bufnr,_,first,_,last,_,_,_)
+			M.highlight_buffer_range(bufnr,first,last)
+		end})
+	end
+	M.highlight_buffer(bufnr)
 end
 
 return M

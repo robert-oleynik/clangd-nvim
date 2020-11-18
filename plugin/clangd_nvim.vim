@@ -29,6 +29,7 @@ endif
 augroup clangd_nvim
 	autocmd!
 	autocmd VimEnter,ColorScheme * runtime syntax/clangd_nvim.vim
+	autocmd InsertLeave FileType c,cpp require'clangd_nvim'.highlight_buffer()
 augroup END
 
 " Load Syntax file
