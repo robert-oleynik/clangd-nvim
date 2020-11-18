@@ -13,8 +13,9 @@ Left: clangd-nvim + nvim-lsp; Right: no plugin
 
 - [X] Implement basic semantic highlight support
 - [X] Implement highlight groups
-- [X] Enable/Disable semantic highlighting
+- [ ] Enable/Disable semantic highlighting
 - [X] Change highlight color
+- [ ] Add deprecated checks
 
 ## Features
 
@@ -32,7 +33,7 @@ Left: clangd-nvim + nvim-lsp; Right: no plugin
 
 ```vim
 " Required
-Plug 'neovim/nvim-lsp'
+Plug 'neovim/nvim-lspconfig'
 " Plugin
 Plug 'robert-oleynik/clangd-nvim'
 ```
@@ -45,38 +46,17 @@ lua << EOF
 local clangd_nvim = require'clangd_nvim'
 
 require'nvim_lsp'.clangd.setup{
-    capabilities = {
-        textDocument = {
-            semanticHighlightingCapabilities = {
-                semanticHighlighting = true
-            }
-        }
-    },
-    on_init = clangd_nvim.on_init
+    capabilities = clangd_nvim.capabilities,
+    on_attach = clangd_nvim.on_attach
 }
 EOF
 ```
 
 ## Functions
 
-**Enable semantic highlighting**
-
->
-> Enabled by default
->
-
+**Highlight current Buffer**
 ```lua
-lua require'clangd_nvim'.enable()
-```
-
-**Disable semantic highlighting**
-```lua
-lua require'clangd_nvim'.disable()
-```
-
-**Reload current buffer's semantic highlight**
-```lua
-lua require'clangd_nvim'.reload()
+lua require'clangd_nvim'.highlight_buffer()
 ```
 
 **Clear current buffer's semantic highlight**
@@ -115,18 +95,18 @@ hi! default link ClangdClass Type
 | `entity.name.function.preprocessor.cpp` | `ClangdPreprocessor` | Macro |
 | `entity.name.namespace.cpp` | `ClangdNamespace` | Namespace |
 | `entity.name.other.dependent.cpp` | `ClangdDependentName` | Function |
-| `entity.name.type.class.cpp` | `ClangdClass` | Type |
-| `entity.name.type.concept.cpp` | `ClangdConcept` | Type |
-| `entity.name.type.dependent.cpp` | `ClangdDependentType` | Type |
-| `entity.name.type.enum.cpp` | `ClangdEnum` | Type |
-| `entity.name.type.typedef.cpp` | `ClangdTypedef` | Type |
-| `entity.name.type.template.cpp` | `ClangdTemplateParameter` | Type |
-| `storage.type.primitive.cpp` | `ClangdPrimitive` | Type |
+| `entity.name.type.class.cpp` | `ClangdClass` | cppType |
+| `entity.name.type.concept.cpp` | `ClangdConcept` | cppType |
+| `entity.name.type.dependent.cpp` | `ClangdDependentcppType` | cppType |
+| `entity.name.type.enum.cpp` | `ClangdEnum` | cppType |
+| `entity.name.type.typedef.cpp` | `ClangdTypedef` | cppType |
+| `entity.name.type.template.cpp` | `ClangdTemplateParameter` | cppType |
+| `storage.type.primitive.cpp` | `ClangdPrimitive` | cppType |
 | `variable.other.cpp` | `ClangdVariable` | Variable |
 | `variable.other.local.cpp` | `ClangdLocalVariable` | Variable |
 | `variable.parameter.cpp` | `ClangdParameter` | Variable |
 | `variable.other.field.cpp` | `ClangdField` | Variable |
 | `variable.other.static.field.cpp` | `ClangdStaticField` | Variable |
-| `variable.other.enummember.cpp` | `ClangdEnumConstant` | Constant |
+| `variable.other.enummember.cpp` | `ClangdEnumConstant` | cppConstant |
 | `meta.disabled` | `ClangdInactiveCode` | Comment |
 
