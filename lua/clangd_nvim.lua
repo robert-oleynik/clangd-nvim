@@ -80,6 +80,9 @@ function M.highlight_ref(bufnr,ref)
 end
 
 function M.highlight_request(bufnr,data)
+	if data == nil then
+		return
+	end
 	local token_data = data["data"]
 	if token_data==nil then
 		vim.api.nvim_err_writeln("clangd-nvim: received empty response")
