@@ -83,7 +83,7 @@ function M.highlight_request(bufnr,data)
 	if data == nil then
 		return
 	end
-	local token_data = data["data"]
+	local token_data = data.data
 	if token_data==nil then
 		vim.api.nvim_err_writeln("clangd-nvim: received empty response")
 		return
@@ -150,6 +150,7 @@ function M.highlight_buffer(bufnr)
 end
 
 function M.on_attach(config)
+	-- print(vim.inspect(config))
 	local bufnr = vim.api.nvim_get_current_buf()
 	if (config.server_capabilities.semanticTokensProvider.range) then
 		vim.api.nvim_buf_attach(bufnr, false, { on_lines = function(_,bufnr,_,first,_,last,_,_,_)
