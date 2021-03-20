@@ -1,3 +1,5 @@
+> DEPRECATED! Use [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) instead.
+
 # clangd-nvim
 
 >
